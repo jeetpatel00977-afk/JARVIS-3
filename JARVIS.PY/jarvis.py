@@ -2,11 +2,37 @@ import datetime
 import requests
 import random
 import webbrowser
+import ollama
 
 
-# ============================================================
-# WIKIPEDIA SEARCH
-# ============================================================
+def ask_ai(question):
+    """Send an unknown question to the local Qwen AI."""
+    try:
+        response = ollama.chat(
+            model="qwen2.5:0.5b",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are JARVIS, a helpful personal AI assistant. "
+                        "Answer clearly, briefly, and naturally. "
+                        "Call the user sir."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": question
+                }
+            ]
+        )
+
+        answer = response["message"]["content"]
+        print(f"JARVIS > {answer}")
+
+    except Exception as error:
+        print("JARVIS > My AI brain is currently unavailable.")
+        print(f"JARVIS > Error: {error}")
+
 
 def search_wikipedia(topic):
     url = "https://en.wikipedia.org/w/api.php"
@@ -50,14 +76,12 @@ def search_wikipedia(topic):
             return
 
         result = results[0]
-
         title = result["title"]
 
         print()
         print(f"JARVIS > I found: {title}")
         print("-" * 60)
 
-        # Get the page summary
         summary_url = (
             "https://en.wikipedia.org/api/rest_v1/page/summary/"
             + title.replace(" ", "_")
@@ -71,7 +95,6 @@ def search_wikipedia(topic):
 
         if summary_response.status_code == 200:
             summary_data = summary_response.json()
-
             extract = summary_data.get("extract")
 
             if extract:
@@ -81,24 +104,15 @@ def search_wikipedia(topic):
                     "JARVIS > I found the page, "
                     "but couldn't get its summary."
                 )
-
         else:
-            print(
-                f"JARVIS > I found the page: {title}"
-            )
+            print(f"JARVIS > I found the page: {title}")
 
         print("-" * 60)
 
     except requests.exceptions.RequestException as error:
-        print(
-            "JARVIS > I couldn't connect to Wikipedia."
-        )
+        print("JARVIS > I couldn't connect to Wikipedia.")
         print(f"JARVIS > Error: {error}")
 
-
-# ============================================================
-# MAIN JARVIS
-# ============================================================
 
 def jarvis():
 
@@ -107,6 +121,7 @@ def jarvis():
     print("=" * 60)
 
     print("Hello, sir. All systems are ready.")
+    print("Local AI brain: ONLINE")
     print("Type 'help' to see what I can do.")
     print()
 
@@ -119,16 +134,14 @@ def jarvis():
 
         command_lower = command.lower()
 
-
-        # ====================================================
+        # -----------------------------
         # GREETINGS
-        # ====================================================
+        # -----------------------------
 
-        if any(word in command_lower for word in [
-            "hello",
-            "hi",
-            "hey"
-        ]):
+        if any(
+            word in command_lower
+            for word in ["hello", "hi", "hey"]
+        ):
 
             responses = [
                 "Hello, sir. How can I assist you?",
@@ -139,10 +152,9 @@ def jarvis():
 
             print("JARVIS >", random.choice(responses))
 
-
-        # ====================================================
+        # -----------------------------
         # TIME
-        # ====================================================
+        # -----------------------------
 
         elif "time" in command_lower:
 
@@ -154,10 +166,9 @@ def jarvis():
                 f"JARVIS > The current time is {current_time}."
             )
 
-
-        # ====================================================
+        # -----------------------------
         # DATE
-        # ====================================================
+        # -----------------------------
 
         elif (
             "date" in command_lower
@@ -172,10 +183,9 @@ def jarvis():
                 f"JARVIS > Today is {current_date}."
             )
 
-
-        # ====================================================
+        # -----------------------------
         # IDENTITY
-        # ====================================================
+        # -----------------------------
 
         elif (
             "who are you" in command_lower
@@ -183,13 +193,13 @@ def jarvis():
         ):
 
             print(
-                "JARVIS > I am JARVIS, your personal AI assistant."
+                "JARVIS > I am JARVIS, "
+                "your personal AI assistant."
             )
 
-
-        # ====================================================
+        # -----------------------------
         # HOW ARE YOU
-        # ====================================================
+        # -----------------------------
 
         elif "how are you" in command_lower:
 
@@ -197,10 +207,9 @@ def jarvis():
                 "JARVIS > All systems are operational, sir."
             )
 
-
-        # ====================================================
+        # -----------------------------
         # STATUS
-        # ====================================================
+        # -----------------------------
 
         elif "status" in command_lower:
 
@@ -214,16 +223,15 @@ JARVIS > SYSTEM STATUS
   Date System       : ONLINE
   Web Browser       : ONLINE
   Wikipedia Search  : ONLINE
+  Local AI Brain    : ONLINE
   Voice System      : NOT INSTALLED
-  AI Brain          : FUTURE UPGRADE
 
 ------------------------------------------------------------
 """)
 
-
-        # ====================================================
+        # -----------------------------
         # WIKIPEDIA SEARCH
-        # ====================================================
+        # -----------------------------
 
         elif command_lower.startswith(
             "search wikipedia for "
@@ -232,7 +240,6 @@ JARVIS > SYSTEM STATUS
             topic = command[21:].strip()
 
             if topic:
-
                 print(
                     f"JARVIS > Searching Wikipedia for {topic}..."
                 )
@@ -240,23 +247,20 @@ JARVIS > SYSTEM STATUS
                 search_wikipedia(topic)
 
             else:
-
                 print(
-                    "JARVIS > Please tell me what you want me to search for."
+                    "JARVIS > Please tell me what "
+                    "you want me to search for."
                 )
 
-
-        # ====================================================
+        # -----------------------------
         # SIMPLE SEARCH
-        # Example: search ronaldo
-        # ====================================================
+        # -----------------------------
 
         elif command_lower.startswith("search "):
 
             topic = command[7:].strip()
 
             if topic:
-
                 print(
                     f"JARVIS > Searching Wikipedia for {topic}..."
                 )
@@ -264,15 +268,14 @@ JARVIS > SYSTEM STATUS
                 search_wikipedia(topic)
 
             else:
-
                 print(
-                    "JARVIS > Please tell me what you want me to search for."
+                    "JARVIS > Please tell me what "
+                    "you want me to search for."
                 )
 
-
-        # ====================================================
-        # GOOGLE
-        # ====================================================
+        # -----------------------------
+        # OPEN GOOGLE
+        # -----------------------------
 
         elif "open google" in command_lower:
 
@@ -284,10 +287,9 @@ JARVIS > SYSTEM STATUS
                 "https://www.google.com"
             )
 
-
-        # ====================================================
-        # YOUTUBE
-        # ====================================================
+        # -----------------------------
+        # OPEN YOUTUBE
+        # -----------------------------
 
         elif "open youtube" in command_lower:
 
@@ -299,10 +301,9 @@ JARVIS > SYSTEM STATUS
                 "https://www.youtube.com"
             )
 
-
-        # ====================================================
-        # GITHUB
-        # ====================================================
+        # -----------------------------
+        # OPEN GITHUB
+        # -----------------------------
 
         elif "open github" in command_lower:
 
@@ -314,10 +315,9 @@ JARVIS > SYSTEM STATUS
                 "https://github.com"
             )
 
-
-        # ====================================================
+        # -----------------------------
         # HELP
-        # ====================================================
+        # -----------------------------
 
         elif (
             "help" in command_lower
@@ -332,12 +332,12 @@ JARVIS > CURRENT CAPABILITIES
   2. Tell the time
   3. Tell the date
   4. Search Wikipedia
-  5. Search using "search <topic>"
-  6. Open Google
-  7. Open YouTube
-  8. Open GitHub
-  9. Basic conversation
- 10. System status
+  5. Open Google
+  6. Open YouTube
+  7. Open GitHub
+  8. Basic conversation
+  9. System status
+ 10. Local AI conversation
  11. Shutdown
 
 Examples:
@@ -346,29 +346,27 @@ Examples:
   what time is it
   what is today's date
   who are you
-  search ronaldo
   search cristiano ronaldo
-  search football
   open google
   open youtube
   open github
   status
-  help
+  tell me a joke
+  explain black holes
+  what is artificial intelligence
   exit
 
 ------------------------------------------------------------
 """)
 
+        # -----------------------------
+        # EXIT
+        # -----------------------------
 
-        # ====================================================
-        # SHUTDOWN
-        # ====================================================
-
-        elif any(word in command_lower for word in [
-            "exit",
-            "quit",
-            "shutdown"
-        ]):
+        elif any(
+            word in command_lower
+            for word in ["exit", "quit", "shutdown"]
+        ):
 
             print(
                 "JARVIS > Shutting down. Goodbye, sir."
@@ -376,21 +374,18 @@ Examples:
 
             break
 
-
-        # ====================================================
-        # UNKNOWN COMMAND
-        # ====================================================
+        # -----------------------------
+        # AI BRAIN
+        # -----------------------------
 
         else:
 
             print(
-                "JARVIS > I don't understand that command yet, sir."
+                "JARVIS > Processing with local AI..."
             )
 
+            ask_ai(command)
 
-# ============================================================
-# START JARVIS
-# ============================================================
 
 if __name__ == "__main__":
     jarvis()
